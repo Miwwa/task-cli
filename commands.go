@@ -31,9 +31,14 @@ func Run(args []string) (string, error) {
 		return HelpCmd()
 	}
 
+	tasks, err := FromFile("./tasks.json")
+	if err != nil {
+		return "", err
+	}
+
 	switch args[0] {
 	case "add":
-		return AddCmd(args[1:])
+		return AddCmd(args[1:], tasks)
 	case "update":
 		return UpdateDescriptionCmd(args[1:])
 	case "delete":
@@ -52,11 +57,15 @@ func HelpCmd() (string, error) {
 	return helpText, nil
 }
 
-func AddCmd(args []string) (string, error) {
+func AddCmd(args []string, storage *TasksStorage) (string, error) {
 	if len(args) == 0 || len(args) > 1 {
 		return "", InvalidUsageError("add <description>")
 	}
-	return fmt.Sprintf("Task added successfully (ID: %s)", args[0]), nil
+	task, err := storage.Add(args[0])
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("Task added successfully (ID: %d)", task.Id), nil
 }
 
 func UpdateDescriptionCmd(args []string) (string, error) {

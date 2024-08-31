@@ -1,5 +1,8 @@
 package main
 
+import "time"
+
+type TaskId uint
 type TaskStatus string
 
 const (
@@ -9,5 +12,9 @@ const (
 )
 
 type Task struct {
-	// todo
+	Id          TaskId     `json:"id"`
+	Description string     `json:"description"`
+	Status      TaskStatus `json:"status"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   time.Time  `json:"updatedAt"`
 }
