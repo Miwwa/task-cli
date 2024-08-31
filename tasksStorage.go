@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"time"
 )
@@ -57,4 +58,61 @@ func (storage *TasksStorage) Add(description string) (Task, error) {
 		return Task{}, err
 	}
 	return task, nil
+}
+
+func (storage *TasksStorage) UpdateDescription(id TaskId, newDescription string) (Task, error) {
+	task, ok := storage.Tasks[id]
+	if !ok {
+		return Task{}, fmt.Errorf("task with id %d not found", id)
+	}
+	task.Description = newDescription
+	task.UpdatedAt = time.Now()
+	storage.Tasks[id] = task
+	err := storage.Save()
+	if err != nil {
+		return Task{}, err
+	}
+	return task, nil
+}
+
+func (storage *TasksStorage) UpdateStatus(id TaskId, newStatus TaskStatus) (Task, error) {
+	task, ok := storage.Tasks[id]
+	if !ok {
+		return Task{}, fmt.Errorf("task with id %d not found", id)
+	}
+	task.Status = newStatus
+	task.UpdatedAt = time.Now()
+	storage.Tasks[id] = task
+	err := storage.Save()
+	if err != nil {
+		return Task{}, err
+	}
+	return task, nil
+}
+
+func (storage *TasksStorage) Delete(id TaskId) error {
+	delete(storage.Tasks, id)
+	err := storage.Save()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (storage *TasksStorage) GetAll() []Task {
+	tasks := make([]Task, 0, len(storage.Tasks))
+	for _, task := range storage.Tasks {
+		tasks = append(tasks, task)
+	}
+	return tasks
+}
+
+func (storage *TasksStorage) GetByStatus(status TaskStatus) []Task {
+	tasks := make([]Task, 0, len(storage.Tasks))
+	for _, task := range storage.Tasks {
+		if task.Status == status {
+			tasks = append(tasks, task)
+		}
+	}
+	return tasks
 }
